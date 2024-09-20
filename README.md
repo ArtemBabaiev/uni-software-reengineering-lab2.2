@@ -7,5 +7,5 @@ Lab 2.1 execution params:
  - Execution Time: 3278ms
  
 Lab 2.2 execution params:
- - Memory consumption/increased on: 5.143MB
- - Execution Time: 395ms
+ - Memory increased: 3.6 - 4MB
+ - Execution Time: 366ms

@@ -2,9 +2,9 @@ package edu.pro;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -27,9 +27,7 @@ public class MainLab22 {
 	}
 
 	private static void execute() throws IOException {
-		InputStream resourceStream = MainLab22.class.getClassLoader().getResourceAsStream("edu/pro/txt/harry.txt");
-		String fileContent = new String(resourceStream.readAllBytes());
-		resourceStream.close();
+		String fileContent = Files.readString(Paths.get("src/edu/pro/txt/harry.txt"));
 		String cleanedFileContent = fileContent.replaceAll("[^\\w\\s]", " ").toLowerCase(Locale.ROOT);
 		HashMap<String, Integer> dictionary = new HashMap<>();
 		try (BufferedReader reader = new BufferedReader(new StringReader(cleanedFileContent))) {
@@ -52,6 +50,7 @@ public class MainLab22 {
 		}
 
 		dictionary.entrySet().stream().sorted((o1, o2) -> Integer.compare(o2.getValue(), o1.getValue())).limit(30)
-				.forEach(i -> System.out.println(i.getKey() + " " + i.getValue()));
+				.forEach(i -> System.out
+						.println(new StringBuilder(i.getKey()).append(" ").append(i.getValue()).toString()));
 	}
 }
