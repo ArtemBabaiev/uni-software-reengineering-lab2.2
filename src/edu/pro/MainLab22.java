@@ -4,53 +4,82 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainLab22 {
-	public static void main(String[] args) throws IOException {
-		Runtime runtime = Runtime.getRuntime();
-		long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
-		long start = System.nanoTime();
+    public static void main(String[] args) throws IOException {
+        long start = System.nanoTime();
+        execute(); //29.65
+        //executeLines(); //30.89
 
-		execute();
+        long finish = System.nanoTime();
 
-		long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
-		long finish = System.nanoTime();
+        System.out.println("------");
+        System.out.println("Execution Time: " + TimeUnit.NANOSECONDS.toMillis(finish - start) + "ms");
 
-		System.out.println("------");
-		System.out.println("Memory increased: " + (usedMemoryAfter - usedMemoryBefore) / 1_048_576.0 + "MB");
-		System.out.println("Execution Time: " + TimeUnit.NANOSECONDS.toMillis(finish - start) + "ms");
+    }
 
-	}
+    private static void execute() throws IOException {
+        Pattern splitPattern = Pattern.compile("\\s+");
+        Path path = Paths.get("src/edu/pro/txt/harry.txt");
 
-	private static void execute() throws IOException {
-		String fileContent = Files.readString(Paths.get("src/edu/pro/txt/harry.txt"));
-		String cleanedFileContent = fileContent.replaceAll("[^\\w\\s]", " ").toLowerCase(Locale.ROOT);
-		HashMap<String, Integer> dictionary = new HashMap<>();
-		try (BufferedReader reader = new BufferedReader(new StringReader(cleanedFileContent))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				String[] words = line.split("\\s+");
-				for (String word : words) {
-					if (!word.isBlank()) {
-						dictionary.put(word, dictionary.getOrDefault(word, 0) + 1);
-					}
-				}
-//				Arrays.stream(words).forEach(word -> {
-//					if (!word.isBlank()) {
-//						dictionary.put(word, dictionary.getOrDefault(word, 0) + 1);
-//					}
-//				});
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        Map<String, Integer> dictionary = new HashMap<>();
+        try (var reader = Files.newBufferedReader(path)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                StringBuilder cleanedLine = clean(line);
+                splitPattern.splitAsStream(cleanedLine).forEach(word -> {
+                    if (!word.isEmpty()) {
+                        word = word.intern();
+                        dictionary.put(word, dictionary.getOrDefault(word, 0) + 1);
+                    }
+                });
+            }
+        }
+        dictionary.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(30)
+                .forEach(i -> System.out.println(i.getKey() + " " + i.getValue()));
+    }
 
-		dictionary.entrySet().stream().sorted((o1, o2) -> Integer.compare(o2.getValue(), o1.getValue())).limit(30)
-				.forEach(i -> System.out
-						.println(new StringBuilder(i.getKey()).append(" ").append(i.getValue()).toString()));
-	}
+    private static void executeLines() throws IOException {
+        Pattern splitPattern = Pattern.compile("\\s+");
+        Path path = Paths.get("src/edu/pro/txt/harry.txt");
+        try (Stream<String> lines = Files.lines(path)) {
+            lines.map(MainLab22::clean)
+                    .flatMap(splitPattern::splitAsStream)
+                    .filter(word -> !word.isEmpty())
+                    .map(String::intern)
+                    .collect(Collectors.groupingBy(w -> w, Collectors.counting()))
+                    .entrySet()
+                    .stream()
+                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                    .limit(30)
+                    .forEach(i -> System.out.println(i.getKey() + " " + i.getValue()));
+        }
+
+    }
+
+
+    private static StringBuilder clean(String line) {
+        char[] chars = line.toCharArray();
+        StringBuilder sb = new StringBuilder();
+        for (char c : chars) {
+            if (Character.isLetter(c)) {
+                if (Character.isUpperCase(c)) {
+                    c = Character.toLowerCase(c);
+                }
+                sb.append(c);
+            } else if (Character.isWhitespace(c)) {
+                sb.append(c);
+            }
+        }
+        return sb;
+    }
 }

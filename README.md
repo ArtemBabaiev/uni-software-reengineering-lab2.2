@@ -1,11 +1,6 @@
-Original execution params:
- - Memory consumption/increased on: 136.431MB
- - Execution Time: 3024ms
-
-Lab 2.1 execution params:
- - Memory consumption/increased on: 9.349MB
- - Execution Time: 3278ms
- 
-Lab 2.2 execution params:
- - Memory increased: 3.6 - 4MB
- - Execution Time: 366ms
+1) Зчитувати файл по рядку за допомогою Files.lines або Files.newBufferedReader
+2) При обробці рядка використати StringBuilder щоб зменшити кількість проміжних рядків
+3) Винести регулярні вирази в окремі змінні Pattern аби не перестворювати їх
+4) Замість створення об'єктів Word використовуємо Map
+5) Виристати методо String.intern щоб отримати слово із StringPool
+6) 
